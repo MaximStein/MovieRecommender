@@ -26,22 +26,28 @@ namespace MovieRecommender
             searchResultListBox.ValueMember = "Id";
             searchResultListBox.DisplayMember = "NiceString";
 
+            selectionMovieBox.Visible = false;
+
             Load += async (sender, args) =>
             {
-                var movie = await GetMovieDetailsAsync("362844");
-                if(movie != null)
-                {
-                    selectionMovieBox.LoadMovieData(movie);
+                
+                var movie1 = await GetMovieDetailsAsync("155");
+                var movie2 = await GetMovieDetailsAsync("49026");
+                var movie3 = await GetMovieDetailsAsync("49040");
+                var movie4 = await GetMovieDetailsAsync("949");
 
+
+                selectionMovieBox.LoadMovieData(movie1);
+                selectionMovieBox.SetOnButtonClick((sender, args) => { 
                     recommendationsPanel.Controls.Clear();
-                     recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    recommendationsPanel.Controls.Add(new MovieBox(movie));
-                    //recommendationsPanel.Controls.Add(new MovieBox());
-                }
+                    recommendationsPanel.Controls.Add(new MovieBox(movie1));
+                    recommendationsPanel.Controls.Add(new MovieBox(movie2));
+                    recommendationsPanel.Controls.Add(new MovieBox(movie3));
+                    recommendationsPanel.Controls.Add(new MovieBox(movie4));                
+                });
+
+                //recommendationsPanel.Controls.Add(new MovieBox());
+
             };  
         }
 
@@ -97,9 +103,7 @@ namespace MovieRecommender
                     }
                 }
 
-                //var records = csv.GetRecords<MoviesMetadataRow>();
-                //var searchResults = records.Where(r => r.OriginalTitle.ToLower().Contains(text)).ToList();
-       
+             
                 var count = resultList.Count();
                 searchResultsLabel.Text = count + " results found";
 
@@ -109,7 +113,6 @@ namespace MovieRecommender
                     //searchResultListBox.Items.AddRange(searchResults.Take(50).ToArray());
                     searchResultListBox.Items.AddRange(resultList.ToArray());
                 }
-                //var records = csv.GetRecords<MoviesMetadataRow>();
             }
         }
 
@@ -122,13 +125,10 @@ namespace MovieRecommender
                 if(data != null)
                 {
                     selectionMovieBox.LoadMovieData(data);
-                    //movieTitleLabel.Text = data.title;
-                    //moviePoster.ImageLocation = getMoviePosterImageUrl(data.poster_path);
-
+                    selectionMovieBox.Visible = true;          
                 }
             }
         }
-
 
     }
 }

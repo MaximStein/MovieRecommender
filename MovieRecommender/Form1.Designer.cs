@@ -38,27 +38,30 @@
             // 
             // searchInputTextBox
             // 
-            this.searchInputTextBox.Location = new System.Drawing.Point(12, 12);
+            this.searchInputTextBox.Location = new System.Drawing.Point(10, 9);
+            this.searchInputTextBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.searchInputTextBox.Name = "searchInputTextBox";
-            this.searchInputTextBox.Size = new System.Drawing.Size(266, 27);
+            this.searchInputTextBox.Size = new System.Drawing.Size(233, 23);
             this.searchInputTextBox.TabIndex = 0;
             // 
             // searchResultListBox
             // 
             this.searchResultListBox.FormattingEnabled = true;
-            this.searchResultListBox.ItemHeight = 20;
-            this.searchResultListBox.Location = new System.Drawing.Point(12, 45);
+            this.searchResultListBox.ItemHeight = 15;
+            this.searchResultListBox.Location = new System.Drawing.Point(10, 46);
+            this.searchResultListBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.searchResultListBox.Name = "searchResultListBox";
-            this.searchResultListBox.Size = new System.Drawing.Size(393, 204);
+            this.searchResultListBox.Size = new System.Drawing.Size(375, 229);
             this.searchResultListBox.TabIndex = 2;
             this.searchResultListBox.SelectedIndexChanged += new System.EventHandler(this.searchResultListBox_SelectedIndexChanged);
             this.searchResultListBox.SelectedValueChanged += new System.EventHandler(this.searchResultListBox_SelectedValueChangedAsync);
             // 
             // searchButton
             // 
-            this.searchButton.Location = new System.Drawing.Point(311, 10);
+            this.searchButton.Location = new System.Drawing.Point(259, 9);
+            this.searchButton.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.searchButton.Name = "searchButton";
-            this.searchButton.Size = new System.Drawing.Size(94, 29);
+            this.searchButton.Size = new System.Drawing.Size(126, 24);
             this.searchButton.TabIndex = 3;
             this.searchButton.Text = "suchen";
             this.searchButton.UseVisualStyleBackColor = true;
@@ -67,39 +70,44 @@
             // searchResultsLabel
             // 
             this.searchResultsLabel.AutoSize = true;
-            this.searchResultsLabel.Location = new System.Drawing.Point(12, 270);
+            this.searchResultsLabel.Location = new System.Drawing.Point(10, 296);
             this.searchResultsLabel.Name = "searchResultsLabel";
-            this.searchResultsLabel.Size = new System.Drawing.Size(0, 20);
+            this.searchResultsLabel.Size = new System.Drawing.Size(0, 15);
             this.searchResultsLabel.TabIndex = 4;
             // 
             // recommendationsPanel
             // 
             this.recommendationsPanel.AutoScroll = true;
             this.recommendationsPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.recommendationsPanel.Location = new System.Drawing.Point(0, 366);
+            this.recommendationsPanel.Location = new System.Drawing.Point(0, 398);
+            this.recommendationsPanel.Margin = new System.Windows.Forms.Padding(5);
             this.recommendationsPanel.Name = "recommendationsPanel";
-            this.recommendationsPanel.Size = new System.Drawing.Size(1114, 339);
+            this.recommendationsPanel.Padding = new System.Windows.Forms.Padding(10);
+            this.recommendationsPanel.Size = new System.Drawing.Size(975, 356);
             this.recommendationsPanel.TabIndex = 6;
             // 
             // selectionMovieBox
             // 
-            this.selectionMovieBox.Location = new System.Drawing.Point(411, 10);
-            this.selectionMovieBox.MaximumSize = new System.Drawing.Size(235, 350);
+            this.selectionMovieBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.selectionMovieBox.Location = new System.Drawing.Point(391, 11);
+            this.selectionMovieBox.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.selectionMovieBox.MaximumSize = new System.Drawing.Size(200, 320);
             this.selectionMovieBox.Name = "selectionMovieBox";
-            this.selectionMovieBox.Size = new System.Drawing.Size(235, 350);
+            this.selectionMovieBox.Size = new System.Drawing.Size(198, 318);
             this.selectionMovieBox.TabIndex = 7;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1114, 705);
+            this.ClientSize = new System.Drawing.Size(975, 754);
             this.Controls.Add(this.selectionMovieBox);
             this.Controls.Add(this.recommendationsPanel);
             this.Controls.Add(this.searchResultsLabel);
             this.Controls.Add(this.searchButton);
             this.Controls.Add(this.searchResultListBox);
             this.Controls.Add(this.searchInputTextBox);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
