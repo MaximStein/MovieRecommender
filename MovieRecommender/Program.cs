@@ -13,8 +13,8 @@ namespace MovieRecommender
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Program.runPythonScript(@"C:\Code\ML\test.py", "asdf");
-            Application.Run(new Form1());
+            Program.runPythonScript(@"recommender.py", "asdf");
+            //Application.Run(new Form1());
 
         }
 
@@ -32,6 +32,14 @@ namespace MovieRecommender
             Process process = new Process();
             process.StartInfo = start;
 
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (!String.IsNullOrEmpty(e.Data))
+                {
+                    Console.WriteLine(e.Data);
+                }
+            };
+
             process.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
                 // Prepend line numbers to each line of the output.
@@ -40,10 +48,16 @@ namespace MovieRecommender
                     Console.WriteLine(e.Data);
                 }
             });
+
+            process.Exited += (sender, e) =>
+            {
+                Console.WriteLine("process exited");
+            };
             process.Start();
 
+            process.BeginErrorReadLine();
             process.BeginOutputReadLine();
-           // process.WaitForExit();
+            process.WaitForExit();
 
             /*using (Process process = Process.Start(start))
             {
