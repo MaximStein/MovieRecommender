@@ -2,6 +2,7 @@
 import pickle
 import pandas as pd
 import json
+import sys
 
 pd.options.mode.chained_assignment = None  # default='warn'
 
@@ -52,12 +53,14 @@ def get_sim_score(x, sim_scores):
 
 #rating_weight 0 bis 1
 def get_order_score(x, rating_weight):
-    #r = 1 + ( rating_weight * ((x['wr'] - 5) * .1))    # -0.5*weight bis 0.5*weight
-    r = (x['weighted_rating'] * .1 + .5)-1     # -0.5 bis 0.5
-    r = rating_weight * r + 1
+    #r = (x['weighted_rating'] * .1 + .5)-1     # -0.5 bis 0.5
 
-   
+    #r = rating_weight * r + 1
+
     #return x['wr'] * rating_weight + x['sim_score']
+    #return r * x['sim_score']
+    r = (x['weighted_rating'] - 5) * rating_weight + 5
+    #print(str(r)+' | '+str(x['weighted_rating']))
     return r * x['sim_score']
 
 def get_similarity_scores(id,indices,cosine_sim):
@@ -65,38 +68,9 @@ def get_similarity_scores(id,indices,cosine_sim):
     sim_scores = list(enumerate(cosine_sim[idx]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     #sim_scores = sim_scores[1:26]
-    sim_scores = sim_scores[1:100]
+    sim_scores = sim_scores[1:150]
     return sim_scores
 
-#def get_similarity_scores(title,indices,cosine_sim):
-#    idx = indices[title]
-#    sim_scores = list(enumerate(cosine_sim[idx]))
-#    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-#    #sim_scores = sim_scores[1:26]
-#    sim_scores = sim_scores[1:100]
-#    return sim_scores
-
-def improved_recommendations_2(title, metadata, indices, cosine_sim, rating_weight=1):
-    #print('rating weight: '+str(rating_weight))
-    sim_scores = get_similarity_scores(title,indices,cosine_sim)
-
-    movie_indices = [i[0] for i in sim_scores]
-    
-    movies = metadata.iloc[movie_indices][['title', 'vote_count', 'vote_average', 'year','id']]
-    vote_counts = movies[movies['vote_count'].notnull()]['vote_count'].astype('int')
-    vote_averages = movies[movies['vote_average'].notnull()]['vote_average'].astype('int')
-    C = vote_averages.mean()
-    m = vote_counts.quantile(0.60)
-    qualified = movies[(movies['vote_count'] >= m) & (movies['vote_count'].notnull()) & (movies['vote_average'].notnull())]
-    qualified['sim_score'] = qualified.apply(get_sim_score, args=(sim_scores,), axis=1)
-    qualified['vote_count'] = qualified['vote_count'].astype('int')
-    qualified['vote_average'] = qualified['vote_average'].astype('int')
-    qualified['weighted_rating'] = qualified.apply(weighted_rating, args=(m,C,), axis=1)
-    qualified['order_score'] = qualified.apply(get_order_score, args=(rating_weight,), axis=1)
-    #qualified = qualified.sort_values('wr', ascending=False).head(10)
-    qualified = qualified.sort_values('order_score', ascending=False).head(10)
-    
-    return qualified[['id','title','year','weighted_rating','sim_score','order_score']]
 
 def get_average(sim_scores, movie_index):
     count = 0
@@ -145,17 +119,29 @@ def improved_recommendations_3(movie_ids, metadata, indices, cosine_sim, rating_
     qualified['weighted_rating'] = qualified.apply(weighted_rating, args=(m,C,), axis=1)
     qualified['order_score'] = qualified.apply(get_order_score, args=(rating_weight,), axis=1)
     #qualified = qualified.sort_values('wr', ascending=False).head(10)
-    qualified = qualified.sort_values('order_score', ascending=False).head(10)
-    
-    return qualified[['id','title','year','weighted_rating','sim_score','order_score']]
-
-
+    qualified = qualified.sort_values('order_score', ascending=False).head(15)
+    qualified['json'] = qualified.apply(lambda x: x.to_json(), axis=1)
+    return qualified[['id','title','year','weighted_rating','sim_score','order_score','json']]
 
 f = open("C:/users/maxim/movieRecommender.txt", "rb")
 r = pickle.load(f)
 f.close()
 
-print(improved_recommendations_3([680,155], r.metadata, r.indices, r.cosine_sim, 3))
+
+ids = [int(i) for i in sys.argv[1].split(',')]
+rating_weight = float(sys.argv[2])
+results = improved_recommendations_3(ids, r.metadata, r.indices, r.cosine_sim, rating_weight)
+#print(results)
+output = '['
+for i in results.index:
+    output += results.loc[i]['json']+','
+output += ']'
+
+print(output)
+
+
+
+#155
 #print(improved_recommendations_2('Pulp Fiction', r.metadata, r.indices, r.cosine_sim, 0))
 #print(improved_recommendations_2('Pulp Fiction', r.metadata, r.indices, r.cosine_sim, .5))
 

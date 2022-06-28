@@ -8,7 +8,7 @@ namespace MovieRecommender
 {
     public class MoviesMetadataRow
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string OriginalTitle { get; set; }
         public string ImdbId { get; set; }
         public string Overview { get; set; }
