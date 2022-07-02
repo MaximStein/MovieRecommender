@@ -85,7 +85,7 @@
             this.MovieSelectionPanel.AutoScroll = true;
             this.MovieSelectionPanel.Location = new System.Drawing.Point(375, 65);
             this.MovieSelectionPanel.Name = "MovieSelectionPanel";
-            this.MovieSelectionPanel.Size = new System.Drawing.Size(1016, 367);
+            this.MovieSelectionPanel.Size = new System.Drawing.Size(1016, 364);
             this.MovieSelectionPanel.TabIndex = 7;
             // 
             // label1
@@ -146,10 +146,10 @@
             // 
             this.RecommendationsBox.Controls.Add(this.RecommendationsPanel);
             this.RecommendationsBox.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.RecommendationsBox.Location = new System.Drawing.Point(0, 513);
+            this.RecommendationsBox.Location = new System.Drawing.Point(0, 560);
             this.RecommendationsBox.Margin = new System.Windows.Forms.Padding(10);
             this.RecommendationsBox.Name = "RecommendationsBox";
-            this.RecommendationsBox.Size = new System.Drawing.Size(1403, 382);
+            this.RecommendationsBox.Size = new System.Drawing.Size(1421, 382);
             this.RecommendationsBox.TabIndex = 14;
             this.RecommendationsBox.TabStop = false;
             this.RecommendationsBox.Text = "recommendations";
@@ -160,14 +160,14 @@
             this.RecommendationsPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RecommendationsPanel.Location = new System.Drawing.Point(3, 23);
             this.RecommendationsPanel.Name = "RecommendationsPanel";
-            this.RecommendationsPanel.Size = new System.Drawing.Size(1397, 356);
+            this.RecommendationsPanel.Size = new System.Drawing.Size(1415, 356);
             this.RecommendationsPanel.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1403, 895);
+            this.ClientSize = new System.Drawing.Size(1421, 942);
             this.Controls.Add(this.RecommendationsBox);
             this.Controls.Add(this.SelectionCountLabel);
             this.Controls.Add(this.label2);

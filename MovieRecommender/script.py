@@ -14,152 +14,133 @@ import numpy as np
 from nltk.stem.snowball import SnowballStemmer
 # Import CountVectorizer and create the count matrix
 from sklearn.feature_extraction.text import CountVectorizer
+import pickle
+
+def get_director(x):
+    for i in x:
+        if i['job'] == 'Director':
+            return i['name']
+    return np.nan
+
+def get_list(x):
+    if isinstance(x, list):
+        names = [i['name'] for i in x]
+        #Check if more than 3 elements exist. If yes, return only first three. If no, return entire list.
+        if len(names) > 3:
+            names = names[:3]
+        return names
+
+    #Return empty list in case of missing/malformed data
+    return []
+
+def clean_data(x):
+    if isinstance(x, list):
+        return [str.lower(i.replace(" ", "")) for i in x]
+    else:
+        #Check if director exists. If not, return empty string
+        if isinstance(x, str):
+            return str.lower(x.replace(" ", ""))
+        else:
+            return ''
+
+def create_soup(x):
+    return ' '.join(x['keywords']) + ' ' + ' '.join(x['cast']) + ' ' + x['director'] + ' '+ x['director'] + ' '+ x['director'] + ' ' + ' '.join(x['genres'])
+
+###################
+
+####################
+
+def filter_keywords(x,s):
+    words = []
+    for i in x:
+        if i in s:
+            words.append(i)
+    return words
+
+def stem(x, stemmer):
+    return [stemmer.stem(i) for i in x]
+
+credits = pd.read_csv('C:/Code/ML/movies_archive/credits.csv')
+keywords = pd.read_csv('C:/Code/ML/movies_archive/keywords.csv')
+
+keywords['id'] = keywords['id'].astype('int')
+credits['id'] = credits['id'].astype('int')
 
 class MovieRecommender:
-    def get_director(x):
-        for i in x:
-            if i['job'] == 'Director':
-                return i['name']
-        return np.nan
 
-    def get_list(x):
-        if isinstance(x, list):
-            names = [i['name'] for i in x]
-            #Check if more than 3 elements exist. If yes, return only first three. If no, return entire list.
-            if len(names) > 3:
-                names = names[:3]
-            return names
+    def __init__(self):
+        self.metadata = pd.read_csv('C:/Code/ML/movies_archive/movies_metadata.csv', low_memory=False)
+        # Remove rows with bad IDs.
+        self.metadata = self.metadata.drop([19730, 29503, 35587, 28700])
 
-        #Return empty list in case of missing/malformed data
-        return []
+        self.metadata['id'] = self.metadata['id'].astype('int')
 
-    def clean_data(x):
-        if isinstance(x, list):
-            return [str.lower(i.replace(" ", "")) for i in x]
-        else:
-            #Check if director exists. If not, return empty string
-            if isinstance(x, str):
-                return str.lower(x.replace(" ", ""))
-            else:
-                return ''
+        self.metadata = self.metadata.merge(credits, on='id')
+        self.metadata = self.metadata.merge(keywords, on='id')
 
-    def create_soup(x):
-        return ' '.join(x['keywords']) + ' ' + ' '.join(x['cast']) + ' ' + x['director'] + ' '+ x['director'] + ' '+ x['director'] + ' ' + ' '.join(x['genres'])
+        features = ['cast', 'crew', 'keywords', 'genres']
+        for feature in features:
+            self.metadata[feature] = self.metadata[feature].apply(literal_eval)
+
+        #vote_counts = self.metadata[self.metadata['vote_count'].notnull()]['vote_count'].astype('int')
+       # vote_averages = self.metadata[self.metadata['vote_average'].notnull()]['vote_average'].astype('int')
+       # self.vote_averages_mean = vote_averages.mean()
+        self.metadata['year'] = pd.to_datetime(self.metadata['release_date'], errors='coerce').apply(lambda x: str(x).split('-')[0] if x != np.nan else np.nan)
+
+       # self.vote_counts_quantile = vote_counts.quantile(0.95)
+
+        self.metadata['director'] = self.metadata['crew'].apply(get_director)
         
-    metadata = pd.read_csv('C:/Code/ML/movies_archive/movies_metadata.csv', low_memory=False)
-    credits = pd.read_csv('C:/Code/ML/movies_archive/credits.csv')
-    keywords = pd.read_csv('C:/Code/ML/movies_archive/keywords.csv')
+        features = ['cast', 'keywords', 'genres']
+        for feature in features:
+            self.metadata[feature] = self.metadata[feature].apply(get_list)
 
-    # Remove rows with bad IDs.
-    metadata = metadata.drop([19730, 29503, 35587, 28700])
+        s = self.metadata.apply(lambda x: pd.Series(x['keywords']),axis=1).stack().reset_index(level=1, drop=True)
+        s.name = 'keyword'
+        s = s.value_counts()
+        s = s[s > 1]
+        stemmer = SnowballStemmer('english')
 
-    keywords['id'] = keywords['id'].astype('int')
-    credits['id'] = credits['id'].astype('int')
-    metadata['id'] = metadata['id'].astype('int')
-
-    metadata = metadata.merge(credits, on='id')
-    metadata = metadata.merge(keywords, on='id')
-
-    features = ['cast', 'crew', 'keywords', 'genres']
-    for feature in features:
-        metadata[feature] = metadata[feature].apply(literal_eval)
-
-    vote_counts = metadata[metadata['vote_count'].notnull()]['vote_count'].astype('int')
-    vote_averages = metadata[metadata['vote_average'].notnull()]['vote_average'].astype('int')
-    C = vote_averages.mean()
-    metadata['year'] = pd.to_datetime(metadata['release_date'], errors='coerce').apply(lambda x: str(x).split('-')[0] if x != np.nan else np.nan)
-
-    m = vote_counts.quantile(0.95)
-
-    def weighted_rating(self,x):
-        v = x['vote_count']
-        R = x['vote_average']
-        return (v/(v+self.m) * R) + (self.m/(self.m+v) * self.C)
-
-    metadata['director'] = metadata['crew'].apply(get_director)
-
-
-    features = ['cast', 'keywords', 'genres']
-    for feature in features:
-        metadata[feature] = metadata[feature].apply(get_list)
-
-    #metadata['keywords'] = metadata['keywords'].apply(lambda x: [str.lower(i.replace(" ", "")) for i in x])
-
-    s = metadata.apply(lambda x: pd.Series(x['keywords']),axis=1).stack().reset_index(level=1, drop=True)
-    s.name = 'keyword'
-    s = s.value_counts()
-    s = s[s > 1]
-    stemmer = SnowballStemmer('english')
-
-
-    def filter_keywords(self,x):
-        words = []
-        for i in x:
-            if i in self.s:
-                words.append(i)
-        return words
-
-    def stem(self, x):
-        return [self.stemmer.stem(i) for i in x]
     
+        self.metadata['keywords'] = self.metadata['keywords'].apply(filter_keywords, args=(s,))
+        #metadata['keywords'] = metadata['keywords'].apply(lambda x: [self.stemmer.stem(i) for i in x])
+        self.metadata['keywords'] = self.metadata['keywords'].apply(stem, args=(stemmer,))
 
-    metadata['keywords'] = metadata['keywords'].apply(filter_keywords)
-    #metadata['keywords'] = metadata['keywords'].apply(lambda x: [self.stemmer.stem(i) for i in x])
-    metadata['keywords'] = metadata['keywords'].apply(stem)
+        #metadata['keywords'] = metadata['keywords'].apply(lambda x: [str.lower(i.replace(" ", "")) for i in x])       
+        #  # Apply clean_data function to your features.
+        features = ['cast', 'keywords', 'director', 'genres']
+        for feature in features:
+            self.metadata[feature] = self.metadata[feature].apply(clean_data)
 
+        # Create a new soup feature
+        self.metadata['soup'] = self.metadata.apply(create_soup, axis=1)
 
-    # Apply clean_data function to your features.
-    features = ['cast', 'keywords', 'director', 'genres']
-    for feature in features:
-        metadata[feature] = metadata[feature].apply(clean_data)
+        #print(metadata[['soup']].head(2))
+        #count = CountVectorizer(stop_words='english')
+        count = CountVectorizer(analyzer='word',ngram_range=(1, 2),min_df=0, stop_words='english')
+        count_matrix = count.fit_transform(self.metadata['soup'])
+        self.cosine_sim = cosine_similarity(count_matrix, count_matrix)
 
-    # Create a new soup feature
-    metadata['soup'] = metadata.apply(create_soup, axis=1)
+        # Reset index of your main DataFrame and construct reverse mapping as before
+        self.metadata = self.metadata.reset_index()
+        titles = self.metadata['title']
+      
+      #  self.indices = pd.Series(self.metadata.index, index=self.metadata['title'])
+        self.indices = pd.Series(self.metadata.index, index=self.metadata['id'])
 
-    #print(metadata[['soup']].head(2))
-
-    #count = CountVectorizer(stop_words='english')
-    count = CountVectorizer(analyzer='word',ngram_range=(1, 2),min_df=0, stop_words='english')
-    count_matrix = count.fit_transform(metadata['soup'])
-    cosine_sim = cosine_similarity(count_matrix, count_matrix)
-
-    # Reset index of your main DataFrame and construct reverse mapping as before
-    metadata = metadata.reset_index()
-    titles = metadata['title']
-    indices = pd.Series(metadata.index, index=metadata['title'])
-
-    #Define a TF-IDF Vectorizer Object. Remove all english stop words such as 'the', 'a'
-    #tfidf = TfidfVectorizer(stop_words='english')
-
-    def get_recommendations(self,title):
-        idx = self.indices[title]    
-        sim_scores = list(enumerate(self.cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:21]
-        movie_indices = [i[0] for i in sim_scores]
-
-        return self.titles.iloc[movie_indices]
+        #Define a TF-IDF Vectorizer Object. Remove all english stop words such as 'the', 'a'
+        #tfidf = TfidfVectorizer(stop_words='english')
 
 
-    def improved_recommendations(self,title):
-        idx = self.indices[title]
-        sim_scores = list(enumerate(self.cosine_sim[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        sim_scores = sim_scores[1:26]
-        movie_indices = [i[0] for i in sim_scores]
-        
-        movies = self.metadata.iloc[movie_indices][['title', 'vote_count', 'vote_average', 'year']]
-        vote_counts = movies[movies['vote_count'].notnull()]['vote_count'].astype('int')
-        vote_averages = movies[movies['vote_average'].notnull()]['vote_average'].astype('int')
-        C = vote_averages.mean()
-        m = vote_counts.quantile(0.60)
-        qualified = movies[(movies['vote_count'] >= m) & (movies['vote_count'].notnull()) & (movies['vote_average'].notnull())]
-        qualified['vote_count'] = qualified['vote_count'].astype('int')
-        qualified['vote_average'] = qualified['vote_average'].astype('int')
-        qualified['wr'] = qualified.apply(self.weighted_rating, axis=1)
-        qualified = qualified.sort_values('wr', ascending=False).head(10)
-        return qualified
+########################################
+
+recommender = MovieRecommender()
+
+file = open('movieRecommender.txt', 'wb')
+pickle.dump(recommender, file)
+file.close()
+
 
 #print(get_recommendations('Pulp Fiction'))
-recommender = MovieRecommender()
-print(recommender.improved_recommendations('Pulp Fiction'))
+
+#print(improved_recommendations('Pulp Fiction', recommender.metadata, recommender.indices, recommender.cosine_sim))
