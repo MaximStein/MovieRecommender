@@ -12,7 +12,8 @@ namespace MovieRecommender
     {
         static readonly HttpClient client = new HttpClient();
         bool isWaitingForRecommendations = false;
-        const String csvLocation = @"C:/Code/ML/movies_archive/movies_metadata.csv";
+        //const String csvLocation = @"C:/Code/ML/movies_archive/movies_metadata.csv";
+        const String csvLocation = "movies_metadata.csv";
 
         CsvConfiguration config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -34,18 +35,6 @@ namespace MovieRecommender
                 var movie2 = await GetMovieDetailsAsync("49026");
                 var movie3 = await GetMovieDetailsAsync("49040");
                 var movie4 = await GetMovieDetailsAsync("949");
-
-
-                /*  selectionMovieBox.LoadMovieData(movie1);
-                  selectionMovieBox.SetCloseButtonHandler((sender, args) => { 
-                      recommendationsPanel.Controls.Clear();
-                      recommendationsPanel.Controls.Add(new MovieBox(movie1));
-                      recommendationsPanel.Controls.Add(new MovieBox(movie2));
-                      recommendationsPanel.Controls.Add(new MovieBox(movie3));
-                      recommendationsPanel.Controls.Add(new MovieBox(movie4));                
-                  });
-                 */
-                //recommendationsPanel.Controls.Add(new MovieBox());
 
             };
         }

@@ -34,14 +34,16 @@ def improved_recommendations(title, metadata, indices, cosine_sim):
     movie_indices = [i[0] for i in sim_scores]
     
     movies = metadata.iloc[movie_indices][['title', 'vote_count', 'vote_average', 'year']]
-    vote_counts = movies[movies['vote_count'].notnull()]['vote_count'].astype('int')
+
+    vote_counts = movies[movies['vote_count'].notnull()]['vote_count'].astype('int')    
     vote_averages = movies[movies['vote_average'].notnull()]['vote_average'].astype('int')
     C = vote_averages.mean()
     m = vote_counts.quantile(0.60)
     qualified = movies[(movies['vote_count'] >= m) & (movies['vote_count'].notnull()) & (movies['vote_average'].notnull())]
     qualified['vote_count'] = qualified['vote_count'].astype('int')
-    qualified['vote_average'] = qualified['vote_average'].astype('int')
+    qualified['vote_average'] = qualified['vote_average'].astype('int')    
     qualified['wr'] = qualified.apply(weighted_rating, args=(m,C,), axis=1)
+
     qualified = qualified.sort_values('wr', ascending=False).head(10)
     return qualified
 
@@ -50,6 +52,7 @@ def get_sim_score(x, sim_scores):
     for s in sim_scores:
         if x.name == s[0]:
             return s[1]
+
 
 #rating_weight 0 bis 1
 def get_order_score(x, rating_weight):
@@ -90,7 +93,7 @@ def contains_movie_index(sim_scores, index):
     return False
 
 def improved_recommendations_3(movie_ids, metadata, indices, cosine_sim, rating_weight=1):
-    #print('rating weight: '+str(rating_weight))
+   
     combined_sim_scores = []
 
     for id in movie_ids:
@@ -108,16 +111,19 @@ def improved_recommendations_3(movie_ids, metadata, indices, cosine_sim, rating_
     movie_indices = [i[0] for i in sim_scores]
     
     movies = metadata.iloc[movie_indices][['title', 'vote_count', 'vote_average', 'year','id']]
+
     vote_counts = movies[movies['vote_count'].notnull()]['vote_count'].astype('int')
     vote_averages = movies[movies['vote_average'].notnull()]['vote_average'].astype('int')
     C = vote_averages.mean()
     m = vote_counts.quantile(0.60)
     qualified = movies[(movies['vote_count'] >= m) & (movies['vote_count'].notnull()) & (movies['vote_average'].notnull())]
-    qualified['sim_score'] = qualified.apply(get_sim_score, args=(sim_scores,), axis=1)
+    qualified['sim_score'] = qualified.apply(get_sim_score, args=(sim_scores,), axis=1)    
     qualified['vote_count'] = qualified['vote_count'].astype('int')
     qualified['vote_average'] = qualified['vote_average'].astype('int')
     qualified['weighted_rating'] = qualified.apply(weighted_rating, args=(m,C,), axis=1)
+    
     qualified['order_score'] = qualified.apply(get_order_score, args=(rating_weight,), axis=1)
+
     #qualified = qualified.sort_values('wr', ascending=False).head(10)
     qualified = qualified.sort_values('order_score', ascending=False).head(15)
     qualified['json'] = qualified.apply(lambda x: x.to_json(), axis=1)
